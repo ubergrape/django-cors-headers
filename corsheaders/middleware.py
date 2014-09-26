@@ -37,20 +37,8 @@ class CorsMiddleware(object):
         '''
             Add the respective CORS headers
         '''
-        origin = request.META.get('HTTP_ORIGIN')
-        if self.is_enabled(request) and origin:
-            # todo: check hostname from db instead
-            url = urlparse(origin)
-
-            if settings.CORS_MODEL is not None:
-                model = get_model(*settings.CORS_MODEL.split('.'))
-                if model.objects.filter(cors=url.netloc).exists():
-                    response[ACCESS_CONTROL_ALLOW_ORIGIN] = origin
-
-            if not settings.CORS_ORIGIN_ALLOW_ALL and self.origin_not_found_in_white_lists(origin, url):
-                return response
-
-            response[ACCESS_CONTROL_ALLOW_ORIGIN] = "*" if (settings.CORS_ORIGIN_ALLOW_ALL and not settings.CORS_ALLOW_CREDENTIALS) else origin
+        if self.is_enabled(request):
+            response[ACCESS_CONTROL_ALLOW_ORIGIN] = "null"
 
             if len(settings.CORS_EXPOSE_HEADERS):
                 response[ACCESS_CONTROL_EXPOSE_HEADERS] = ', '.join(settings.CORS_EXPOSE_HEADERS)
@@ -65,14 +53,6 @@ class CorsMiddleware(object):
                     response[ACCESS_CONTROL_MAX_AGE] = settings.CORS_PREFLIGHT_MAX_AGE
 
         return response
-
-    def origin_not_found_in_white_lists(self, origin, url):
-        return url.netloc not in settings.CORS_ORIGIN_WHITELIST and not self.regex_domain_match(origin)
-
-    def regex_domain_match(self, origin):
-        for domain_pattern in settings.CORS_ORIGIN_REGEX_WHITELIST:
-            if re.match(domain_pattern, origin):
-                return origin
 
     def is_enabled(self, request):
         return re.match(settings.CORS_URLS_REGEX, request.path)
