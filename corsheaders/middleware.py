@@ -15,6 +15,7 @@ ACCESS_CONTROL_ALLOW_CREDENTIALS = 'Access-Control-Allow-Credentials'
 ACCESS_CONTROL_ALLOW_HEADERS = 'Access-Control-Allow-Headers'
 ACCESS_CONTROL_ALLOW_METHODS = 'Access-Control-Allow-Methods'
 ACCESS_CONTROL_MAX_AGE = 'Access-Control-Max-Age'
+X_FRAME_OPTIONS = 'X-Frame-Options'
 
 
 class CorsMiddleware(object):
@@ -51,6 +52,9 @@ class CorsMiddleware(object):
                 response[ACCESS_CONTROL_ALLOW_METHODS] = ', '.join(settings.CORS_ALLOW_METHODS)
                 if settings.CORS_PREFLIGHT_MAX_AGE:
                     response[ACCESS_CONTROL_MAX_AGE] = settings.CORS_PREFLIGHT_MAX_AGE
+
+            if response.has_header(X_FRAME_OPTIONS):
+                del response[X_FRAME_OPTIONS]
 
         return response
 
